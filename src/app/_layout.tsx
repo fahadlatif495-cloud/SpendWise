@@ -5,11 +5,23 @@ import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AppSplash } from '@/components/AppSplash';
+import { ThemeProvider, useThemeChoice } from '@/components/ThemeProvider';
 import { ExpenseProvider } from '@/expenses/ExpenseContext';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <ExpenseProvider>
+        <RootView />
+      </ExpenseProvider>
+    </ThemeProvider>
+  );
+}
+
+function RootView() {
+  const { colors, isDark } = useThemeChoice();
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
@@ -17,16 +29,18 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ExpenseProvider>
-      <View style={styles.root}>
-        <StatusBar style={showSplash ? 'light' : 'dark'} />
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="add" />
-        </Stack>
-        {showSplash ? <AppSplash onFinish={() => setShowSplash(false)} /> : null}
-      </View>
-    </ExpenseProvider>
+    <View style={[styles.root, { backgroundColor: colors.background }]}>
+      <StatusBar style={showSplash || isDark ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.background },
+        }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="add" />
+      </Stack>
+      {showSplash ? <AppSplash onFinish={() => setShowSplash(false)} /> : null}
+    </View>
   );
 }
 

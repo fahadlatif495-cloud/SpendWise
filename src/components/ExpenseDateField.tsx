@@ -1,10 +1,11 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { useColors, useThemeChoice } from '@/components/ThemeProvider';
 import { formatExpenseDate, toISODate } from '@/expenses/format';
-import { colors, radius, shadows, sizes, spacing, type } from '@/theme';
+import { type AppColors, radius, shadows, sizes, spacing, type } from '@/theme';
 
 type ExpenseDateFieldProps = {
   date: Date;
@@ -13,6 +14,9 @@ type ExpenseDateFieldProps = {
 
 /** Tappable date row. Android opens the system dialog. iOS opens a spinner sheet. */
 export function ExpenseDateField({ date, onChange }: ExpenseDateFieldProps) {
+  const colors = useColors();
+  const { isDark } = useThemeChoice();
+  const styles = useMemo(() => createStyles(colors), [colors]);
   const [open, setOpen] = useState(false);
 
   return (
@@ -52,7 +56,7 @@ export function ExpenseDateField({ date, onChange }: ExpenseDateFieldProps) {
                 value={date}
                 mode="date"
                 display="spinner"
-                themeVariant="light"
+                themeVariant={isDark ? 'dark' : 'light'}
                 textColor={colors.textPrimary}
                 onValueChange={(_event, selected) => onChange(selected)}
               />
@@ -70,7 +74,8 @@ export function ExpenseDateField({ date, onChange }: ExpenseDateFieldProps) {
   );
 }
 
-const styles = StyleSheet.create({
+function createStyles(colors: AppColors) {
+  return StyleSheet.create({
   dateField: {
     height: sizes.input,
     borderRadius: radius.input,
@@ -90,7 +95,7 @@ const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(31, 41, 55, 0.4)',
+    backgroundColor: colors.overlay,
   },
   backdropFill: {
     flex: 1,
@@ -105,7 +110,7 @@ const styles = StyleSheet.create({
   doneButton: {
     height: sizes.button,
     borderRadius: radius.button,
-    backgroundColor: colors.primary,
+    backgroundColor: colors.primaryButton,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -114,3 +119,4 @@ const styles = StyleSheet.create({
     color: colors.white,
   },
 });
+}

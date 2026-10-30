@@ -2,8 +2,49 @@ import type { TextStyle, ViewStyle } from 'react-native';
 
 // SpendWise design tokens. Screens should use these instead of raw colors or sizes.
 
-export const colors = {
+const categoryColors = {
+  food: '#F97316',
+  transport: '#3B82F6',
+  bills: '#8B5CF6',
+  shopping: '#EC4899',
+  entertainment: '#06B6D4',
+  other: '#6B7280',
+} as const;
+
+export type AppColors = {
+  primary: string;
+  primaryButton: string;
+  primaryLight: string;
+  primaryTint: string;
+  background: string;
+  surface: string;
+  white: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
+  border: string;
+  success: string;
+  warning: string;
+  danger: string;
+  warningTint: string;
+  dangerTint: string;
+  overlay: string;
+  chartRgb: string;
+  chartLabelRgb: string;
+  categories: typeof categoryColors;
+  categoryTints: {
+    food: string;
+    transport: string;
+    bills: string;
+    shopping: string;
+    entertainment: string;
+    other: string;
+  };
+};
+
+export const lightColors: AppColors = {
   primary: '#3730A3',
+  primaryButton: '#3730A3',
   primaryLight: '#6366F1',
   primaryTint: '#EEF2FF',
   background: '#FAFAFA',
@@ -16,15 +57,12 @@ export const colors = {
   success: '#16A34A',
   warning: '#F59E0B',
   danger: '#DC2626',
-  categories: {
-    food: '#F97316',
-    transport: '#3B82F6',
-    bills: '#8B5CF6',
-    shopping: '#EC4899',
-    entertainment: '#06B6D4',
-    other: '#6B7280',
-  },
-  // Light fills behind category icons. The spec asks for a tint and does not list hex values.
+  warningTint: '#FEF3C7',
+  dangerTint: '#FEE2E2',
+  overlay: 'rgba(31, 41, 55, 0.4)',
+  chartRgb: '99, 102, 241',
+  chartLabelRgb: '107, 114, 128',
+  categories: categoryColors,
   categoryTints: {
     food: '#FFEDD5',
     transport: '#DBEAFE',
@@ -33,9 +71,43 @@ export const colors = {
     entertainment: '#CFFAFE',
     other: '#F3F4F6',
   },
-} as const;
+};
 
-export type CategoryKey = keyof typeof colors.categories;
+export const darkColors: AppColors = {
+  primary: '#A5B4FC',
+  primaryButton: '#4F46E5',
+  primaryLight: '#818CF8',
+  primaryTint: '#312E81',
+  background: '#0F172A',
+  surface: '#1E293B',
+  white: '#FFFFFF',
+  textPrimary: '#F8FAFC',
+  textSecondary: '#CBD5E1',
+  textMuted: '#94A3B8',
+  border: '#334155',
+  success: '#4ADE80',
+  warning: '#FBBF24',
+  danger: '#F87171',
+  warningTint: '#451A03',
+  dangerTint: '#450A0A',
+  overlay: 'rgba(0, 0, 0, 0.65)',
+  chartRgb: '165, 180, 252',
+  chartLabelRgb: '203, 213, 225',
+  categories: categoryColors,
+  categoryTints: {
+    food: '#7C2D12',
+    transport: '#1E3A8A',
+    bills: '#4C1D95',
+    shopping: '#831843',
+    entertainment: '#164E63',
+    other: '#334155',
+  },
+};
+
+/** Light palette for saved category colors. Screens use useColors() so they can switch. */
+export const colors = lightColors;
+
+export type CategoryKey = keyof typeof categoryColors;
 
 export const spacing = {
   xs: 8,
