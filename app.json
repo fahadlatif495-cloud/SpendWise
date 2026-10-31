@@ -8,11 +8,16 @@
     "scheme": "spendwise",
     "userInterfaceStyle": "automatic",
     "android": {
+      "package": "com.spendwise.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#3730A3",
         "foregroundImage": "./assets/images/android-icon-foreground.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "server",
@@ -35,6 +40,16 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "1073e57e-1cb5-4755-baf3-600c54c6142e"
+      }
     }
   }
 }

@@ -2,8 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo, useState } from 'react';
-import { Alert, Keyboard, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { Alert, Keyboard, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { CategoryIcon } from '@/components/CategoryIcon';
@@ -52,7 +52,31 @@ export default function AddExpenseScreen() {
   const [repeatMonthly, setRepeatMonthly] = useState(editing?.repeatMonthly ?? false);
   const [remind, setRemind] = useState(editing?.remind ?? false);
   const [receiptUri, setReceiptUri] = useState(editing?.receiptUri);
-  const [error, setError] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    const showEvent = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvent = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates.height);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+    const timer = setTimeout(() => setToast(''), 2000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   async function pickReceipt() {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -79,7 +103,7 @@ export default function AddExpenseScreen() {
   function saveExpense() {
     const amount = parseAmount(amountText);
     if (amount == null) {
-      setError('Enter an amount');
+      setToast('Enter an amount');
       return;
     }
 
@@ -140,10 +164,19 @@ export default function AddExpenseScreen() {
         <Text style={styles.title}>{editing ? 'Edit' : kind === 'income' ? 'Add Income' : 'Add Expense'}</Text>
       </View>
 
+      {toast ? (
+        <View style={styles.toast}>
+          <Text style={styles.toastText}>{toast}</Text>
+        </View>
+      ) : null}
+
+      <View style={[styles.body, { marginBottom: keyboardHeight }]}>
       <ScrollView
         style={styles.form}
         contentContainerStyle={styles.formContent}
         keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        nestedScrollEnabled
         showsVerticalScrollIndicator={false}>
         <View style={styles.choiceRow}>
           {(['expense', 'income'] as const).map((item) => {
@@ -167,12 +200,7 @@ export default function AddExpenseScreen() {
             <TextInput
               style={styles.amountInput}
               value={amountText}
-              onChangeText={(value) => {
-                setAmountText(value);
-                if (error) {
-                  setError('');
-                }
-              }}
+              onChangeText={setAmountText}
               placeholder="0"
               placeholderTextColor={colors.primary}
               keyboardType="decimal-pad"
@@ -181,7 +209,6 @@ export default function AddExpenseScreen() {
             />
           </View>
         </View>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
 
         <ScrollView
           horizontal
@@ -255,6 +282,7 @@ export default function AddExpenseScreen() {
           placeholder="Add a note..."
           placeholderTextColor={colors.textMuted}
           multiline
+          scrollEnabled={false}
           underlineColorAndroid="transparent"
           selectionColor={colors.primary}
         />
@@ -267,6 +295,7 @@ export default function AddExpenseScreen() {
         style={({ pressed }) => [styles.saveButton, pressed && styles.savePressed]}>
         <Text style={styles.saveText}>{editing ? 'Save Changes' : kind === 'income' ? 'Save Income' : 'Save Expense'}</Text>
       </Pressable>
+      </View>
     </SafeAreaView>
   );
 }
@@ -294,6 +323,22 @@ function createStyles(colors: AppColors) {
   title: {
     ...type.screenTitle,
     color: colors.textPrimary,
+  },
+  toast: {
+    marginHorizontal: spacing.screen,
+    marginBottom: spacing.xs,
+    backgroundColor: colors.danger,
+    borderRadius: radius.input,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.gap,
+  },
+  toastText: {
+    ...type.body,
+    color: colors.white,
+    textAlign: 'center',
+  },
+  body: {
+    flex: 1,
   },
   form: {
     flex: 1,
@@ -330,12 +375,6 @@ function createStyles(colors: AppColors) {
     minWidth: 48,
     padding: 0,
     margin: 0,
-  },
-  error: {
-    ...type.secondary,
-    color: colors.danger,
-    textAlign: 'center',
-    marginTop: spacing.xs,
   },
   chipScroll: {
     flexGrow: 0,
